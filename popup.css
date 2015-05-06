@@ -1,0 +1,7 @@
+.container {
+    min-width: 480px;
+}
+.context-selector-label {
+    display: block;
+    margin-bottom: 5px;
+}

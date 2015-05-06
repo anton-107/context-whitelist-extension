@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Contextualized Whitelists",
+  "version": "0.0.1",
+
+  "description": "Blocks any page that is not in the whitelist of the context you are working in",
+
+  "icons": { "128": "launcher.png" },
+
+  "browser_action": {
+    "default_title": "Contextualized Whitelists",
+    "default_popup": "popup.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["whitelist.js"],
+      "run_at": "document_end"
+    }
+  ],
+
+  "permissions": [
+    "storage"
+  ]
+}
