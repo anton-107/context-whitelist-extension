@@ -15,12 +15,13 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["whitelist.js"],
+      "js": ["utils.js", "whitelist.js"],
       "run_at": "document_end"
     }
   ],
 
   "permissions": [
-    "storage"
+    "storage",
+    "tabs"
   ]
 }

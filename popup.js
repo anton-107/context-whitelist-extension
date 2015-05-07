@@ -1,10 +1,10 @@
 //var debug = true;
 
 var STORAGE_KEYS = {
-    CONTEXT_ON: 'contextWhitelistIsActive',
-    CONTEXT_NAMES: 'contextWhitelistNames',
+    CONTEXT_ON           : 'contextWhitelistIsActive',
+    CONTEXT_NAMES        : 'contextWhitelistNames',
     CONTEXT_ALLOWED_HOSTS: 'contextWhitelistHostsByContext',
-    CURRENT_CONTEXT_ID: 'contextWhitelistId'
+    CURRENT_CONTEXT_ID   : 'contextWhitelistId'
 };
 
 // initial setup:
@@ -21,12 +21,12 @@ values[STORAGE_KEYS.CURRENT_CONTEXT_ID] = 'context_1';
 
 chrome.storage.sync.set(values);
 
-
 document.addEventListener('DOMContentLoaded', function () {
 
     var debug = document.getElementById("debug");
     var onOffCheckbox = document.querySelector("input[name=contextWhitelistIsActive]");
     var contextRadios = document.querySelectorAll("input[name=contextWhitelistActiveContext]");
+    var allowButton = document.getElementById("addCurrentHostToAllowed");
 
     if (debug) {
         window.addEventListener('error', function (e) {
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var values = {};
         values[STORAGE_KEYS.CONTEXT_ON] = onOffCheckbox.checked;
 
-        chrome.storage.sync.set(values, function() {
+        chrome.storage.sync.set(values, function () {
             // Notify that we saved.
             if (debug) {
                 debug.innerHTML = 'synced the value: ' + chrome.storage.sync.get(STORAGE_KEYS.CONTEXT_ON);
@@ -56,8 +56,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    contextRadios.forEach(function (contextRadio) {
+    Array.prototype.forEach.call(contextRadios, function (contextRadio) {
 
+    });
+
+    chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
+        var hostname = Utils.getHostName(new URL(tabs[0].url).hostname);
+        allowButton.innerText = 'Add ' + hostname + ' to allowed hosts of current context';
     });
 
 });

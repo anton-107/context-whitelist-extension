@@ -21,24 +21,27 @@ var contextWhitelist = {
         chrome.storage.sync.get(STORAGE_KEYS_VALUES, function (values) {
             var isWhitelistModeOn = values[STORAGE_KEYS.CONTEXT_ON];
             var currentContextName = scope.getContextName(values[STORAGE_KEYS.CURRENT_CONTEXT_ID], values[STORAGE_KEYS.CONTEXT_NAMES]);
+            var allowedHosts = scope.getAllowedHosts(values[STORAGE_KEYS.CURRENT_CONTEXT_ID], values[STORAGE_KEYS.CONTEXT_ALLOWED_HOSTS]);
 
             if (debug) {
                 console.log('isWhitelistModeOn', isWhitelistModeOn);
             }
 
             if (isWhitelistModeOn) {
-                var host = scope.getHostName(location.host);
+                var host = Utils.getHostName(location.host);
 
                 if (debug) {
                     console.log('checking host:', host);
                 }
 
-                if (scope.isHostBlocked(host)) {
+                if (scope.isHostBlocked(host, allowedHosts)) {
                     document.body.innerHTML = "" +
                         "this page is not in the current context's whitelist: " +
                         "" + host +
                         "<br/> Current context is: " +
-                        "" + currentContextName;
+                        "" + currentContextName +
+                        "<br/> The allowed hosts in this context are: " +
+                        "" + JSON.stringify(allowedHosts);
                     console.log('the host is blocked');
                 } else {
                     console.log('the host is not blocked');
@@ -46,20 +49,15 @@ var contextWhitelist = {
             }
         });
     },
+    getAllowedHosts: function (contextId, allowedHosts) {
+        allowedHosts = allowedHosts || [];
+
+        return allowedHosts[contextId] || [];
+    },
     getContextName: function (contextId, contextNames) {
         return contextNames[contextId] || '#' + contextId;
     },
-    getHostName: function (fullStringHostName) {
-        var parts = fullStringHostName.split('.').reverse();
-        if (parts.length > 1) {
-            return [parts[1], parts[0]].join('.');
-        } else if (parts.length === 1) {
-            return parts[0];
-        } else {
-            return '';
-        }
-    },
-    isHostBlocked: function (host) {
+    isHostBlocked: function (host/*, allowedHosts */) {
         var r = false, isInGlobalWhitelist = false;
 
         globalWhitelist.forEach(function (item) {
