@@ -3,8 +3,11 @@ var debug = true;
 var STORAGE_KEYS = {
     CONTEXT_ON: 'contextWhitelistIsActive',
     CONTEXT_NAMES: 'contextWhitelistNames',
+    CONTEXT_ALLOWED_HOSTS: 'contextWhitelistHostsByContext',
     CURRENT_CONTEXT_ID: 'contextWhitelistId'
 };
+
+var STORAGE_KEYS_VALUES = Object.keys(STORAGE_KEYS).map(function (key) {return STORAGE_KEYS[key];});
 
 var globalWhitelist = [
     'google.',
@@ -12,22 +15,12 @@ var globalWhitelist = [
 ];
 
 var contextWhitelist = {
-    getHostName: function (fullStringHostName) {
-        var parts = fullStringHostName.split('.').reverse();
-        if (parts.length > 1) {
-            return [parts[1], parts[0]].join('.');
-        } else if (parts.length === 1) {
-            return parts[0];
-        } else {
-            return '';
-        }
-    },
     blockPage: function () {
         var scope = this;
 
-        chrome.storage.sync.get(Object.values(STORAGE_KEYS), function (values) {
+        chrome.storage.sync.get(STORAGE_KEYS_VALUES, function (values) {
             var isWhitelistModeOn = values[STORAGE_KEYS.CONTEXT_ON];
-            var currentContextName = values[STORAGE_KEYS.CURRENT_CONTEXT_ID];
+            var currentContextName = scope.getContextName(values[STORAGE_KEYS.CURRENT_CONTEXT_ID], values[STORAGE_KEYS.CONTEXT_NAMES]);
 
             if (debug) {
                 console.log('isWhitelistModeOn', isWhitelistModeOn);
@@ -52,6 +45,19 @@ var contextWhitelist = {
                 }
             }
         });
+    },
+    getContextName: function (contextId, contextNames) {
+        return contextNames[contextId] || '#' + contextId;
+    },
+    getHostName: function (fullStringHostName) {
+        var parts = fullStringHostName.split('.').reverse();
+        if (parts.length > 1) {
+            return [parts[1], parts[0]].join('.');
+        } else if (parts.length === 1) {
+            return parts[0];
+        } else {
+            return '';
+        }
     },
     isHostBlocked: function (host) {
         var r = false, isInGlobalWhitelist = false;
